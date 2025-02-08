@@ -159,7 +159,7 @@ void MLGrid::initializeGrid()
     {
         for(auto & node: layer)
         {
-            node.bias = getRandFloat()*2;
+            node.bias = getRandFloat();
         }
     }
     for (auto& layer : grid)
@@ -204,8 +204,9 @@ void MLGrid::calcOutput()
             {
                 node.output += node.prevs[i]->output * node.weights[i]; // pobudzenie neuronu "e"
                 node.bef_af = node.output;
-                node.output = activate_functions[li](node.output);
             }
+            //std::cout << "pobudzenie " << node.output << std::endl;
+            node.output = activate_functions[li](node.output);
         }
         li++;
     }
@@ -247,6 +248,7 @@ void MLGrid::correctWeights(const std::vector<float>& tar_out)
                 float delta = grid[li][ni].sigma * der_act_funs[li]( grid[li][ni].prevs[i]->output * grid[li][ni].weights[i] ); // r   f(prev output)
                 grid[li][ni].weights[i] += eta * delta * grid[li][ni].prevs[i]->output;
                 grid[li][ni].weights[i] += ((std::rand()%20000) / 20000 * 2 -1)*0.0001;
+                //std::cout << li << " " << ni << " " << i << std::endl;
             }
         }
     }
