@@ -1,0 +1,25 @@
+﻿  SMLGrid.cpp
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.h(46,17): warning C4305: "inicjowanie": obcięcie z "double" do "float"
+  (kompilowanie pliku źródłowego „SMLGrid.cpp”)
+  
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(22,16): warning C4244: "return": konwersja z "double" do "float", możliwa utrata danych
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(31,48): warning C4244: "return": konwersja z "double" do "float", możliwa utrata danych
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(35,16): warning C4244: "return": konwersja z "double" do "float", możliwa utrata danych
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(39,23): warning C4244: "return": konwersja z "int" do "float", możliwa utrata danych
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(51,23): warning C4244: "return": konwersja z "int" do "float", możliwa utrata danych
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(149,33): warning C4244: "inicjowanie": konwersja z "_Rep" do "unsigned int", możliwa utrata danych
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(149,33): warning C4244:         with
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(149,33): warning C4244:         [
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(149,33): warning C4244:             _Rep=__int64
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(149,33): warning C4244:         ]
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(152,37): warning C4244: "return": konwersja z "double" do "float", możliwa utrata danych
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(218,12): warning C4267: "inicjowanie": konwersja z "size_t" do "int", możliwa utrata danych
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(225,17): warning C4267: "inicjowanie": konwersja z "size_t" do "int", możliwa utrata danych
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(238,17): warning C4267: "inicjowanie": konwersja z "size_t" do "int", możliwa utrata danych
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(249,80): warning C4244: "+=": konwersja z "double" do "_Ty", możliwa utrata danych
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(249,80): warning C4244:         with
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(249,80): warning C4244:         [
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(249,80): warning C4244:             _Ty=float
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(249,80): warning C4244:         ]
+D:\Magazyn\Studnia_czasu\dev_cpp\smllib\SMLlib\SMLGrid.cpp(10,1): warning C4715: "af::getFunDer”: niewszystkie ścieżki kodu zwracają wartość
+  SMLlib.vcxproj -> D:\Magazyn\Studnia_czasu\dev_cpp\smllib\x64\Debug\SMLlib.exe
