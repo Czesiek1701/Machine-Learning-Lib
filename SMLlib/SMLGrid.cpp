@@ -7,54 +7,63 @@ af::afType af::getFunDer(af::afType fun)
     if (fun == &af::tanh) return &af::tanh_der;
     if (fun == &af::stepBipolar) return &af::stepBipolar_der;
     if (fun == &af::bilinear) return &af::bilinear_der;
+    if (fun == &af::sign) return &af::sign_der;
 }
 
-float af::linear(const float& input_sum)
+double af::linear(const double& input_sum)
 {
     return input_sum;
 }
-float af::linear_der(const float& input_sum)
+double af::linear_der(const double& input_sum)
 {
     return 1;
 }
-float af::sigmoid(const float& input_sum)
+double af::sigmoid(const double& input_sum)
 {
     return 1.0 / (1 + std::exp(-1 * input_sum));
 }
-float af::sigmoid_der(const float& input_sum)
+double af::sigmoid_der(const double& input_sum)
 {
-    float s = sigmoid(input_sum);
+    double s = sigmoid(input_sum);
     return s = s * (1 - s);
 }
-float af::tanh(const float& input_sum)
+double af::tanh(const double& input_sum)
 {
     return 2.0 / (1 + std::exp(-2 * input_sum))-1;
 }
-float af::tanh_der(const float& input_sum)
+double af::tanh_der(const double& input_sum)
 {
     return 1.0 - std::pow(af::tanh(input_sum),2);
 }
-float af::stepBipolar(const float& input_sum)
+double af::stepBipolar(const double& input_sum)
 {
     return (input_sum >0)?1:(-1);
 }
-float af::stepBipolar_der(const float& input_sum)
+double af::stepBipolar_der(const double& input_sum)
 {
     return 1;
 }
-float af::bilinear(const float& input_sum)
+double af::bilinear(const double& input_sum)
 {
     return (input_sum > 0) ? input_sum : (0);
 }
-float af::bilinear_der(const float& input_sum)
+double af::bilinear_der(const double& input_sum)
 {
-    return (input_sum > 0) ? 1 : (1);;
+    return (input_sum > 0) ? 1 : (1);
+}
+double af::sign(const double& input_sum)
+{
+    return (input_sum >= 0)?1:(-1);
+}
+double af::sign_der(const double& input_sum)
+{
+    return 0.1;
 }
 
 void MLGrid::createGrid(
     int input_size,
     std::vector<int> nodes_nums,
-    std::vector<float(*)(const float&)> act_funs
+    std::vector<double(*)(const double&)> act_funs
     )
 {
     if (nodes_nums.size() > act_funs.size())
@@ -62,6 +71,8 @@ void MLGrid::createGrid(
         std::cout << "Too less act funs" << nodes_nums.size() << ">" << act_funs.size() << std::endl;
         return;
     }
+
+    constNode.output = -1;
     
     input.clear();
     for (int i = 0; i < input_size; i++)
@@ -79,21 +90,23 @@ void MLGrid::createGrid(
 
         MLNode node;
         //node.afp = act_funs[ln]; 
+        node.prevs.push_back(&constNode);
         if (ln == 0)
         {
-            node.weights = std::vector<float>(input.size());
+            node.weights = std::vector<double>(input.size()+1);
             for (int i=0;i< input.size();i++)
             {
                 node.prevs.push_back(&(input[i]));
             }
         }
         else {
-            node.weights = std::vector<float>(grid[ln - 1].size());
+            node.weights = std::vector<double>(grid[ln - 1].size()+1);
             for (int i = 0; i < grid[ln-1].size(); i++)
             {
                 node.prevs.push_back(&(grid[ln - 1][i]));
             }
         }
+        node.afp = act_funs[ln];
         grid.push_back(std::vector<MLNode>(nodes_nums[ln],node));
 
 
@@ -143,40 +156,37 @@ void MLGrid::showGrid()
 
 }
 
-float MLGrid::getRandFloat()
+double getRanddouble()
 {
     static auto st_time = std::chrono::system_clock::now().time_since_epoch();
     static unsigned int st_seed = std::chrono::duration_cast
         <std::chrono::milliseconds>(st_time).count();
     st_seed = ((st_seed + 327) * 1567 - 3) % 10000;
+    //std::cout << "rand: " << (st_seed / 10000.0) * 2 - 1 << std::endl;
     return  (st_seed / 10000.0) * 2 - 1;
 }
 
 void MLGrid::initializeGrid()
 {
 
-    for (auto& layer : grid)
-    {
-        for(auto & node: layer)
-        {
-            node.bias = getRandFloat();
-        }
-    }
+    //std::cout << "initializing" << std::endl;
+
     for (auto& layer : grid)
     {
         for (auto& node : layer)
         {
+            node.bias = getRanddouble();
             for (auto& weight : node.weights)
             {
 
-            weight = getRandFloat();
+            weight = getRanddouble();
             }
         }
     }
 
 }
 
-void MLGrid::setInput(const std::vector<float>& invals)
+void MLGrid::setInput(const std::vector<double>& invals)
 {
     if (invals.size() != input.size())
     {
@@ -202,9 +212,12 @@ void MLGrid::calcOutput()
             node.output = node.bias;
             for (int i = 0; i < node.prevs.size(); i++)
             {
+                //node.output += node.const_weight * (-1); // pobudzenie neuronu "e"
+                //std::cout << node.prevs[i]->output;
                 node.output += node.prevs[i]->output * node.weights[i]; // pobudzenie neuronu "e"
-                node.bef_af = node.output;
             }
+            //std::cout << std::endl;
+            node.e_input = node.output;
             //std::cout << "pobudzenie " << node.output << std::endl;
             node.output = activate_functions[li](node.output);
         }
@@ -213,8 +226,89 @@ void MLGrid::calcOutput()
     //std::cout << grid[grid.size() - 1][0].output << std::endl;
 }
 
-void MLGrid::correctWeights(const std::vector<float>& tar_out)
+void MLGrid::calcErrors(const std::vector<double>& tar_out)
 {
+    // OUTPUT LAYER SIGMA
+    int li = grid.size() - 1;
+    for (int ni = 0; ni < grid[li].size(); ni++)
+    {
+        grid[li][ni].sigma = (tar_out[ni] - grid[li][ni].output); // d-y
+    }
+
+    // HIDDEN LAYERS SIGMA
+    for (int li = grid.size() - 2; li > -1; li--) //backward
+    {
+        for (int ni = 0; ni < grid[li].size(); ni++)
+        {
+            grid[li][ni].sigma = 0;
+            for (int nL = 0; nL < grid[li + 1].size(); nL++)
+            {
+                grid[li][ni].sigma += grid[li + 1][(nL)].weights[ni] * grid[li + 1][(nL)].sigma;
+            }
+        }
+    }
+}
+
+void MLGrid::correctWeights(const std::vector<double>& tar_out)
+{
+    calcErrors(tar_out);
+    // UPDATE ALL WEIGHTS
+    //double delta;
+    for (int li = grid.size() - 1; li > -1; li--) //backward
+    {
+        for (int ni = 0; ni < grid[li].size(); ni++)
+        {
+            //double delta = eta * grid[li][ni].sigma * (1); // r   f(prev output)
+            //delta *= (1) * grid[li][ni].output;
+            //double delta = eta * grid[li][ni].sigma * af::tanh_der(grid[li][ni].output)*grid[li][ni].output;
+            /*
+            for (int i = 0; i < grid[li][ni].prevs.size(); i++)
+            {
+                delta = grid[li][ni].sigma * der_act_funs[li]( grid[li][ni].prevs[i]->output * grid[li][ni].weights[i] ); // r   f(prev output)
+                grid[li][ni].weights[i] += eta * delta * grid[li][ni].prevs[i]->output;// -0.00001 * eta * grid[li][ni].weights[i];
+                grid[li][ni].weights[i] += getRanddouble()*0.001;
+            }
+            */
+            //grid[li][ni].const_weight += grid[li][ni].sigma * der_act_funs[li]((-1)* grid[li][ni].const_weight)* eta*(-1);
+            grid[li][ni].teach(this);
+        }
+    }
+
+    grid[0][1].teach(this);
+
+    return;
+}
+
+void MLNode::teach(const MLGrid* g)
+{
+    for (int i = 0; i < this->prevs.size(); i++)
+    {
+        double delta = this->sigma * af::getFunDer(afp)(this->prevs[i]->output * this->weights[i]); // r   f(prev output)
+        this->weights[i] += g->eta * delta * this->prevs[i]->output;// -0.00001 * eta * grid[li][ni].weights[i];
+        this->weights[i] += getRanddouble() * 0.0001;
+    }
+}
+
+void MLGrid::correctWeightsOneByOne(const std::vector<double>& tar_out)
+{
+
+    for (int li = grid.size() - 1; li > -1; li--) //backward
+    {
+        for (int ni = 0; ni < grid[li].size(); ni++)
+        {
+            calcOutput();
+            calcErrors(tar_out);
+            grid[li][ni].teach(this);
+        }
+    }
+
+
+}
+
+void MLGrid::correctWeightsCoin(const std::vector<double>& tar_out)
+{
+    //eta *= 0.9999;
+    //std::cout << "eta: " << eta << std::endl;
     // OUTPUT LAYER SIGMA
     int li = grid.size() - 1;
     for (int ni = 0; ni < grid[li].size(); ni++)
@@ -238,64 +332,27 @@ void MLGrid::correctWeights(const std::vector<float>& tar_out)
     // UPDATE ALL WEIGHTS
     for (int li = grid.size() - 1; li > -1; li--) //backward
     {
-        for (int ni = 0; ni < grid[li].size(); ni++)
-        {
-            //float delta = eta * grid[li][ni].sigma * (1); // r   f(prev output)
+        //for (int ni = 0; ni < grid[li].size(); ni++)
+        //{
+            //double delta = eta * grid[li][ni].sigma * (1); // r   f(prev output)
             //delta *= (1) * grid[li][ni].output;
-            //float delta = eta * grid[li][ni].sigma * af::tanh_der(grid[li][ni].output)*grid[li][ni].output;
-            for (int i = 0; i < grid[li][ni].prevs.size(); i++)
-            {
-                float delta = grid[li][ni].sigma * der_act_funs[li]( grid[li][ni].prevs[i]->output * grid[li][ni].weights[i] ); // r   f(prev output)
-                grid[li][ni].weights[i] += eta * delta * grid[li][ni].prevs[i]->output;
-                grid[li][ni].weights[i] += ((std::rand()%20000) / 20000 * 2 -1)*0.0001;
-                //std::cout << li << " " << ni << " " << i << std::endl;
-            }
+            //double delta = eta * grid[li][ni].sigma * af::tanh_der(grid[li][ni].output)*grid[li][ni].output;
+        auto win_neur = std::max_element((grid[li]).begin(), (grid[li]).end(), [](const MLNode& a, const MLNode& b) {return (a.e_input)< (b.e_input); });
+        for (int i = 0; i < win_neur->prevs.size(); i++)
+        {
+            double delta = win_neur->sigma * der_act_funs[li](win_neur->prevs[i]->output* win_neur->weights[i]); // r   f(prev output)
+            win_neur->weights[i] += eta * delta * win_neur->prevs[i]->output;
+            //win_neur->weights[i] += ((std::rand() % 20000) / 20000 * 2 - 1) * 0.0001;
+            //std::cout << li << " " << ni << " " << i << std::endl;
         }
+        //}
     }
 
     return;
-
-    /*
-    //int li = grid.size()-1;
-    for (int ni = 0; ni < grid[li].size(); ni++)
-    {
-        grid[li][ni].sigma = (tar_out[ni] - grid[li][ni].output) * (1);
-        float delta = eta * grid[li][ni].sigma;
-        //delta *= (1) * grid[li][ni].output;
-        //float delta = eta * grid[li][ni].sigma * af::tanh_der(grid[li][ni].output);// *grid[li][ni].output;
-        //float delta = eta * (grid[li][ni].output - grid[li][ni].prev_output);
-        for (int i = 0; i < grid[li][ni].prevs.size(); i++)
-        {
-            grid[li][ni].weights[i] += delta * (1) * grid[li][ni].prevs[i]->output;
-            grid[li][ni].weights[i] += getRandFloat()/100;
-        }
-    }
-
-    // NAPRAWIÆ TUTAJ COŒ
-    for (int li = grid.size()-2; li > -1; li--) //backward
-    {
-        for (int ni = 0; ni < grid[li].size(); ni++)
-        {
-            grid[li][ni].sigma = 0;
-            for (int nL = 0; nL < grid[li + 1].size(); nL++)
-            {
-                grid[li][ni].sigma += grid[li + 1][(nL)].weights[ni] * grid[li + 1][(nL)].sigma;
-            }
-
-            float delta = eta * grid[li][ni].sigma;
-            //delta *= (1) * grid[li][ni].output;
-            //float delta = eta * grid[li][ni].sigma * af::tanh_der(grid[li][ni].output)*grid[li][ni].output;
-            for (int i = 0; i < grid[li][ni].prevs.size(); i++)
-            {
-                grid[li][ni].weights[i] += delta * (1) * grid[li][ni].prevs[i]->output;
-                grid[li][ni].weights[i] += getRandFloat() / 100;
-            }
-        }
-    }*/
 }
  
 
-std::vector<float>* MLGrid::getOutput()
+std::vector<double>* MLGrid::getOutput()
 {
     out.clear();
     for (auto v : grid[grid.size()-1])
@@ -303,4 +360,9 @@ std::vector<float>* MLGrid::getOutput()
         out.push_back(v.output);
     }
     return &out;
+}
+
+void MLGrid::setEta(double e)
+{
+    eta = e;
 }

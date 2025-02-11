@@ -12,28 +12,53 @@
 
 namespace af
 {
-    typedef float (*afType)(const float&);
+    typedef double (*afType)(const double&);
 
     afType getFunDer(afType);
 
-    float linear(const float& input_sum);
-    float linear_der(const float& input_sum);
+    double linear(const double& input_sum);
+    double linear_der(const double& input_sum);
 
-    float sigmoid(const float& input_sum);
-    float sigmoid_der(const float& input_sum);
+    double sigmoid(const double& input_sum);
+    double sigmoid_der(const double& input_sum);
 
-    float tanh(const float& input_sum);
-    float tanh_der(const float& input_sum);
+    double tanh(const double& input_sum);
+    double tanh_der(const double& input_sum);
 
-    float stepBipolar(const float& input_sum);
-    float stepBipolar_der(const float& input_sum);
+    double stepBipolar(const double& input_sum);
+    double stepBipolar_der(const double& input_sum);
 
-    float bilinear(const float& input_sum);
-    float bilinear_der(const float& input_sum);
+    double bilinear(const double& input_sum);
+    double bilinear_der(const double& input_sum);
+
+    double sign(const double& input_sum);
+    double sign_der(const double& input_sum);
 
 };
 
-class MLNode;
+
+double getRanddouble();
+
+class MLGrid;
+
+class MLNode
+{
+private:
+    //double const_weight = -1;
+    double output=0;
+    double e_input=0;
+    double bias = 0;
+    //double (*afp)(const double&)= af::linear;
+    std::vector< MLNode* > prevs;
+    std::vector< MLNode* > nexts;
+    std::vector< double > weights;
+    double sigma = 0;
+    friend MLGrid;
+
+    af::afType afp = af::linear;
+
+    void teach(const MLGrid* g);
+};
 
 class MLGrid
 {
@@ -42,36 +67,33 @@ private:
     std::vector< std::vector<MLNode> > grid;
     std::vector<af::afType> activate_functions;
     std::vector<af::afType> der_act_funs;
-    std::vector<float> out;
-    float eta = 0.05;
+    std::vector<double> out;
+    double eta=10000;
+    MLNode constNode;
 public:
     void createGrid(
         int input_size, 
         std::vector<int> nodes_nums,
-        std::vector<float(*)(const float&)> act_funs
+        std::vector<double(*)(const double&)> act_funs
     );
     void showGrid(); 
     void initializeGrid();
-    void setInput(const std::vector<float>&);
+    void setInput(const std::vector<double>&);
     void calcOutput();
-    void correctWeights(const std::vector<float>&);
-    float getRandFloat();
-    std::vector<float>* getOutput();
+    void calcErrors(const std::vector<double>&);
+    void correctWeights(const std::vector<double>&);
+    void correctWeightsCoin(const std::vector<double>&);
+
+    void correctWeightsOneByOne(const std::vector<double>&);
+
+    std::vector<double>* getOutput();
+
+    void setEta(double);
+
+    friend MLNode;
 };
 
-class MLNode
-{
-private:
-    float output;
-    float bef_af;
-    float bias = 0;
-    float (*afp)(const float&);
-    std::vector< MLNode* > prevs;
-    std::vector< MLNode* > nexts;
-    std::vector< float > weights;
-    float sigma;
-    friend MLGrid;
-};
+
 
 
 #endif 
