@@ -84,7 +84,7 @@ class ConstLayer : public Layer
 public:
     explicit ConstLayer() : Layer() {}
     explicit ConstLayer(int nn);// : Layer(nn) {}
-    virtual void calcOutput() override;
+    virtual void calcOutput() override; 
 };
 
 class OutputLayer : public Layer

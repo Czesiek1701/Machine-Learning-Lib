@@ -129,7 +129,7 @@ void Layer::calcOutput()
     for (const Layer* const lp : prev_layers)
     {
         //std::cout << "calc" << std::endl;
-        net += wp->transpose() * lp->output;
+        net += wp->transpose() * lp->output; 
         ++wp;
     }
     output = net;

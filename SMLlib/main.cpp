@@ -15,7 +15,7 @@ float refFun(float x)
 	//return af::tanh(5*(x-0.5));
 	//if (x < 0.2 && x > -0.4) return 0.6;
 	//return 0;
-	if (x < -0.5) return 1;
+	if (x < -0.5) return 1; 
 	if (x < 0.1) return -0.6;
 	if (x < 0.4) return 0.1;
 	return 0.5;
