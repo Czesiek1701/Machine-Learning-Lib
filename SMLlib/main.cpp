@@ -1,8 +1,5 @@
 #include <iostream>
-#include "SMLGrid.h"
-#include <fstream>
-#include<map>
-#include <algorithm>
+#include "SMLNetwork.h"
 #include <numeric>
 
 float refFun(float x)
@@ -28,91 +25,92 @@ float refFun(float x)
 
 int main()
 {
+	std::vector<Layer*> layers;
 
-	MLGrid grid;
+	InputLayer li = InputLayer(1);
+	ConstLayer l0 = ConstLayer(1);
+	Layer l1 = OutputLayer(5,af::linear);
+	Layer l2 = OutputLayer(5, af::linear);
+	OutputLayer l3 = OutputLayer(1, af::linear);
+	
+	// GRID ONEBYONE
 
-	grid.createGrid(1, { 10,10,5,1 }, { &af::linear , &af::sign, &af::linear, &af::linear,af::tanh,&af::linear,&af::linear });
-	grid.setEta(0.01);
+	l1.connectBack(&li);
+	l2.connectBack(&li);
+	l1.connectBack(&l0);
+	l2.connectBack(&l0);
+	l3.connectBack(&l0);
+	l3.connectBack(&l1);
+	l3.connectBack(&l2);
 
-	grid.initializeGrid();
+	layers.push_back(&li);
+	layers.push_back(&l0);
+	layers.push_back(&l1);
+	layers.push_back(&l2);
+	layers.push_back(&l3);
 
-	grid.setInput({ 0 });
-	grid.calcOutput();
-	grid.showGrid();
-
-	//return 0;
-
-	std::ofstream refFile("graphs/output.txt");
-
-	float eps = 0;
-
-	const int NP = 9;
+	const int NP = 18;
 	std::vector<float> inputs_vec(NP);
-	std::iota(inputs_vec.begin(), inputs_vec.end(), -NP/2);
-	std::for_each(inputs_vec.begin(), inputs_vec.end(), [](float& n) { n /= 1.0*(NP/2); });
+	std::iota(inputs_vec.begin(), inputs_vec.end(), -NP / 2);
+	std::for_each(inputs_vec.begin(), inputs_vec.end(), [](float& n) { n /= 1.0 * (NP / 2); });
 
-	for (int show = 0; show < 10000; show++) 
+	egn::Matrix<double, 1, 1> d(-5);
+
+	for (int i = 0; i < 100; i++)
 	{
-		eps = 0;
+		float eps = 0;
 		std::vector<float> inputs_temp = inputs_vec;
 
+		// teaching on vector
 		for (int sample = 0; sample < inputs_vec.size(); sample++)
 		{
 			//float input = (std::rand()%1000)/1000.0*2-1;
 			int id = std::rand() % inputs_temp.size();
-			float input = inputs_temp[id];
+			d << inputs_temp[id];
 			//std::cout << input << std::endl;
-			inputs_temp.erase(inputs_temp.begin()+id);
+			inputs_temp.erase(inputs_temp.begin() + id);
 
-			grid.setInput({ input });
+			li.setInput(d);
+			l3.setTargetOutput(d);
 
-			//for (int i = 0; i < 10; i++)
+			for (auto itr = layers.rbegin(); itr != layers.rend(); ++itr)
 			{
-				grid.calcOutput();
-				grid.correctWeightsOneByOne({ refFun(input)});
+				(*itr)->calcSigma();
 			}
-
-			//grid.calcOutput();
-			//grid.showGrid();
-
-			
+			for (auto itr = layers.rbegin(); itr != layers.rend(); ++itr)
+			{
+				(*itr)->calcDelta();
+			}
+			for (auto itr = layers.rbegin(); itr != layers.rend(); ++itr)
+			{
+				(*itr)->correctWeight();
+			}
+			for (auto& l : layers)
+			{
+				l->calcOutput();
+			}
+			//.showOutput();
+			//std::cout << l3.getTarget() - l3.getOutput() << std::endl;
 		}
 
-		eps = 0;
-		for (int i = 0; i < inputs_vec.size(); i++)
+		//getting error
+		for (auto in : inputs_vec)
 		{
-			float input = inputs_vec[i];
-			grid.setInput({ input });
-			grid.calcOutput();
-			eps += abs(refFun(input) - (*grid.getOutput())[0]);
-			//std::cout << abs(refFun(input) - (*grid.getOutput())[0]) << " ";
+			d << in;
+			li.setInput(d);
+			l3.setTargetOutput(d);
+			for (auto& l : layers)
+			{
+				l->calcOutput();
+			}
+			//.showOutput();
+			//std::cout << l3.getTarget() - l3.getOutput() << std::endl;
+			eps += (l3.getTarget() - l3.getOutput())[0];
 		}
-		std::cout << "" << show << "\t" << eps / inputs_vec.size() << std::endl;
+		std::cout << eps / inputs_vec.size() << std::endl;
 
-		//std::cout << show << std::endl;
 	}
-
-	//std::cout << "przed loop" << std::endl;
-	for ( int i=0; i<inputs_vec.size(); i++ )
-	{
-		float input = inputs_vec[i];
-		//std::cout << input << std::endl;
-		grid.setInput({ input });
-		grid.calcOutput();
-		//std::cout << "float " << input << std::endl;
-		refFile << input << "\t" << refFun(input) << "\t" << (*grid.getOutput())[0] << std::endl;
-		std::cout << abs(refFun(input) - (*grid.getOutput())[0]) << " ";
-		//std::cout << input << "\t" << refFun(input) << "\t" << (*grid.getOutput())[0] << std::endl;
-	}
-	std::cout << std::endl;
-
-	grid.setInput({ -0.1 });
-	grid.calcOutput();
-	grid.showGrid();
-
-	refFile.close();
-
-
 
 	return 0;
+
 }
