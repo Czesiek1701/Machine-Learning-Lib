@@ -2,7 +2,7 @@
 
 af::afType af::getFunDer(af::afType fun)
 {
-    if (fun == &af::linear) return &af::linear_der;
+    if (fun == &af::linear) return &af::linear_der; 
     if (fun == &af::sigmoid) return &af::sigmoid_der;
     if (fun == &af::sigmoid3) return &af::sigmoid3_der;
     if (fun == &af::tanh) return &af::tanh_der;

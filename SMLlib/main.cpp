@@ -16,7 +16,7 @@ float refFun(float x)
 	//if (x < 0.2 && x > -0.4) return 0.6;
 	//return 0;
 	if (x < -0.5) return 1;
-	if (x < 0.1) return -0.6;
+	if (x < 0.1) return -0.6; 
 	if (x < 0.4) return 0.1;
 	return 0.5;
 	//return 0.5;
@@ -52,7 +52,7 @@ int main()
 	const int NP = 18;
 	std::vector<float> inputs_vec(NP);
 	std::iota(inputs_vec.begin(), inputs_vec.end(), -NP / 2);
-	std::for_each(inputs_vec.begin(), inputs_vec.end(), [](float& n) { n /= 1.0 * (NP / 2); });
+	std::for_each(inputs_vec.begin(), inputs_vec.end(), [NP](float& n) { n /= 1.0 * (NP / 2); });
 
 	egn::Matrix<double, 1, 1> d(-5);
 
