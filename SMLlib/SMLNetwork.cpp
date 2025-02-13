@@ -106,18 +106,18 @@ Layer::Layer(int nn = 1, af::afType lfun = af::linear, double e = 0.1)
 }
 
 Layer::Layer()
-    : Layer(1,af::linear,0.1)
+    : Layer(1, af::linear, 0.1)
 {
 }
 Layer::Layer(int n)
-: Layer(n, af::linear, 0.1)
+    : Layer(n, af::linear, 0.1)
 {
 }
 Layer::Layer(int n, double e)
     : Layer(n, af::linear, e)
 {
 }
-Layer::Layer(int n , af::afType f)
+Layer::Layer(int n, af::afType f)
     : Layer(n, f, 0.1)
 {
 }
@@ -145,7 +145,7 @@ void Layer::connectBack(Layer* pl)
 {
     this->prev_layers.push_back(pl);
     pl->next_layers.push_back(this);
-    this->weight.push_back(egn::MatrixXd(pl->getN(),this->getN()));
+    this->weight.push_back(egn::MatrixXd(pl->getN(), this->getN()));
     //for (auto& m : (*(this->weight.rend())).reshaped()) m = getRandDouble();
     for (auto& m : weight.back().reshaped()) { m = getRandDouble(); }
 }
@@ -211,12 +211,12 @@ void Layer::calcSigma()
     this->sigma.setConstant(0);
     for (auto nl : next_layers)
     {
-        int wn = 
-        std::find(
-            nl->prev_layers.begin(),
-            nl->prev_layers.end(),
-            this
-        ) - nl->prev_layers.begin();
+        int wn =
+            std::find(
+                nl->prev_layers.begin(),
+                nl->prev_layers.end(),
+                this
+            ) - nl->prev_layers.begin();
         //std::cout << "from: " << nl << " : " << wn << std::endl;
         //std::cout << sigma << std::endl;
         //std::cout << nl->sigma << std::endl;
@@ -230,8 +230,8 @@ void ConstLayer::calcOutput()
     return;
 }
 
-ConstLayer::ConstLayer(int nn) 
-    : Layer(nn,nullptr,0) 
+ConstLayer::ConstLayer(int nn)
+    : Layer(nn, nullptr, 0)
 {
     output.setConstant(1);
 }
@@ -323,7 +323,7 @@ void Layer::correctWeight()
         //std::cout << "delta\n" << delta << std::endl;
         //std::cout << "deltaW\n";
         //std::cout << eta * l->output * delta.transpose() << std::endl;
-        *w += eta * (l->output)*delta.transpose();
+        *w += eta * (l->output) * delta.transpose();
         ++w;
     }
 }

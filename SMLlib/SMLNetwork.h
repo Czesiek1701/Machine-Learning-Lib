@@ -112,4 +112,4 @@ public:
     void setInput(egn::Matrix<double, egn::Dynamic, 1>);
 };
 
-#endif 
+#endif

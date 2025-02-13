@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include "SMLNetwork.h"
 #include <numeric>
 
@@ -10,7 +10,7 @@ float refFun(float x)
 	//return (7 * x * x * x - 0.15 * x * x - 3.29 * x + 0.097)*0.5;
 	//return (1.4 * x * x * x - 0.082 * x * x - 1.4 * x + 0.08);
 	//return ((0.8 * x + 0.4) * (0.8 * x + 0.4) - 0.2)*0.75;
-	//return af::sigmoid(3 * (x+0.3) + 0.8) - af::sigmoid(3 * (2*x+0.3)-0.8);
+	//return af::sigmoid(3 * (x+0.3) + 0.😎 - af::sigmoid(3 * (2*x+0.3)-0.8);
 	//return af::sigmoid_der(4*x);
 	//return af::tanh(5*(x-0.5));
 	//if (x < 0.2 && x > -0.4) return 0.6;
@@ -29,10 +29,10 @@ int main()
 
 	InputLayer li = InputLayer(1);
 	ConstLayer l0 = ConstLayer(1);
-	Layer l1 = OutputLayer(5,af::linear);
+	Layer l1 = OutputLayer(5, af::linear);
 	Layer l2 = OutputLayer(5, af::linear);
 	OutputLayer l3 = OutputLayer(1, af::linear);
-	
+
 	// GRID ONEBYONE
 
 	l1.connectBack(&li);
