@@ -65,7 +65,7 @@ int main()
 		for (int sample = 0; sample < inputs_vec.size(); sample++)
 		{
 			//float input = (std::rand()%1000)/1000.0*2-1;
-			int id = std::rand() % inputs_temp.size();
+			int id = static_cast<int>(10000*getRandDouble()) % inputs_temp.size();
 			d << inputs_temp[id];
 			//std::cout << input << std::endl;
 			inputs_temp.erase(inputs_temp.begin() + id);
@@ -83,7 +83,7 @@ int main()
 			}
 			for (auto itr = layers.rbegin(); itr != layers.rend(); ++itr)
 			{
-				(*itr)->correctWeight();
+				(*itr)->correctAllWeights();
 			}
 			for (auto& l : layers)
 			{
