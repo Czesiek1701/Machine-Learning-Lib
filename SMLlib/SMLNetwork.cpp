@@ -19,7 +19,7 @@ NNetwork::NNetwork(int input_size, std::vector<int> neuron_nums, bool connect, s
 		}
 
 		output_layer = std::make_unique<OutputLayer>(neuron_nums[lastN], actFuns[lastN], etas[lastN]);
-		layers_all.push_back(input_layer.get());
+		layers_all.push_back(output_layer.get());
 	}
 	else if(etas.size() == 1 && actFuns.size() > 1)
 	{
@@ -30,7 +30,7 @@ NNetwork::NNetwork(int input_size, std::vector<int> neuron_nums, bool connect, s
 		}
 
 		output_layer = std::make_unique<OutputLayer>(neuron_nums[lastN], actFuns[lastN], etas[0]);
-		layers_all.push_back(input_layer.get());
+		layers_all.push_back(output_layer.get());
 	}
 	else if (etas.size() > 1 && actFuns.size() == 1)
 	{
@@ -41,7 +41,7 @@ NNetwork::NNetwork(int input_size, std::vector<int> neuron_nums, bool connect, s
 		}
 
 		output_layer = std::make_unique<OutputLayer>(neuron_nums[lastN], actFuns[0], etas[lastN]);
-		layers_all.push_back(input_layer.get());
+		layers_all.push_back(output_layer.get());
 	}
 	else if (etas.size() == 1 && actFuns.size() == 1)
 	{
@@ -52,7 +52,7 @@ NNetwork::NNetwork(int input_size, std::vector<int> neuron_nums, bool connect, s
 		}
 
 		output_layer = std::make_unique<OutputLayer>(neuron_nums[lastN], actFuns[0], etas[0]);
-		layers_all.push_back(input_layer.get());
+		layers_all.push_back(output_layer.get());
 	}
 
 
@@ -68,24 +68,26 @@ NNetwork::NNetwork(int input_size, std::vector<int> neuron_nums, bool connect, s
 
 void NNetwork::setCalcOrder()
 {
-	calc_order = { 0 ,1 , 2 ,3 };
+	calc_order = std::vector<int>(layers_all.size());
+	std::iota(calc_order.begin(), calc_order.end(), 0); // !!!!!
 }
 
 void NNetwork::setLearningOrder()
 {
-	learning_order = { 3, 2, 1 ,0 };
+	learning_order = calc_order;
+	std::reverse(calc_order.begin(), calc_order.end()); // !!!!!
 }
 
 
-//void NNetwork::setInput(const egn::Matrix<double, egn::Dynamic, 1>& in)
-//{
-//	input_layer->setInput(in);
-//}
-//
-//void NNetwork::setTargetOutput(const egn::Matrix<double, egn::Dynamic, 1>& in)
-//{
-//	output_layer->setTargetOutput(in);
-//}
+void NNetwork::setInput(const egn::Matrix<double, egn::Dynamic, 1>& in)
+{
+	input_layer->setInput(in);
+}
+
+void NNetwork::setTargetOutput(const egn::Matrix<double, egn::Dynamic, 1>& in)
+{
+	output_layer->setTargetOutput(in);
+}
 
 
 
@@ -96,4 +98,31 @@ void NNetwork::showLayers() const
 		std::cout << "ln" << std::endl;
 		layers_all[ln]->showLayer();
 	}
+}
+
+void NNetwork::calcOutput()
+{
+	for (auto ln : calc_order)
+	{
+		//std::cout << ln << ", ";
+		layers_all[ln]->calcOutput();
+	}
+	//std::cout << std::endl;
+}
+
+void NNetwork::correctWeights()
+{
+	for (auto ln : learning_order)
+	{
+		//std::cout << ln << ", ";
+		layers_all[ln]->calcSigma();
+		layers_all[ln]->calcDelta();
+		layers_all[ln]->correctAllWeights();
+	}
+	//std::cout << std::endl;
+}
+
+void NNetwork::showOutput() const
+{
+	output_layer->showOutput();
 }

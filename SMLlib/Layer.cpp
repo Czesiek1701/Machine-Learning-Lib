@@ -43,14 +43,6 @@ Layer::Layer(int n)
     : Layer(n, af::linear, 0.1)
 {
 }
-Layer::Layer(int n, double e)
-    : Layer(n, af::linear, e)
-{
-}
-Layer::Layer(int n, af::afType f)
-    : Layer(n, f, 0.1)
-{
-}
 
 void Layer::calcOutput()
 {
@@ -91,9 +83,15 @@ void Layer::showOutput() const
     std::cout << this->output << std::endl;
 }
 
+
+std::string Layer::getName() const
+{
+    return "Layer";
+}
+
 void Layer::showLayer() const
 {
-    std::cout << "---\n"<<"Layer"<< "\t" << this << std::endl;
+    std::cout << "---\n"<< getName() << ": " << this << std::endl;
     auto w = weight.begin();
     for (auto l : prev_layers)
     {

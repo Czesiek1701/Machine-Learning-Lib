@@ -26,13 +26,10 @@ protected:
     af::afType afp = af::linear;
     af::afType afp_der = af::linear_der;
     double eta = 0.1;
-    //const std::string name = "Layer";
 public:
     explicit Layer();
     virtual ~Layer();
     explicit Layer(int);
-    explicit Layer(int, double);
-    explicit Layer(int, af::afType);
     explicit Layer(int, af::afType, double);
     virtual void calcOutput();
     void connectBack(Layer*);
@@ -42,5 +39,6 @@ public:
     virtual void calcSigma();
     virtual void calcDelta();
     virtual void correctAllWeights();
+    virtual std::string getName() const;
 
 };

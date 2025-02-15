@@ -23,17 +23,35 @@ double refFun(float x)
 	//return af::sigmoid(x);
 }
 
-namespace egn = Eigen;
+namespace egn = Eigen; 
+
+// connecting nets, better orders
 
 int main()
 {
-	NNetwork nnet(1, { 3,1 }, true, { af::sigmoid, af::linear }, { 0.1 });
-	
-	//nnet.setInput(egn::Matrix<double, 1, 1>(-2));
-	//nnet.setTargetOutput(egn::Matrix<double, 1, 1>(-2));
+	NNetwork nnet(1, { 10,10,3,1 }, true, { af::tanh, af::sign, af::sigmoid, af::linear }, { 0.1 });
+
+	nnet.setCalcOrder();	// !!!!!
+	nnet.setLearningOrder(); // !!!
+
+	nnet.setInput(egn::Matrix<double, 1, 1>(-2));
+	nnet.setTargetOutput(egn::Matrix<double, 1, 1>(-100));
 
 
-	nnet.showLayers();
+	//nnet.showLayers();
+
+	for (int i = 0; i < 100; i++)
+	{
+		nnet.correctWeights();
+		nnet.calcOutput();
+		nnet.showOutput();
+	}
+
+	//nnet.showLayers();
+
+
+
+
 	return 0;
 }
 

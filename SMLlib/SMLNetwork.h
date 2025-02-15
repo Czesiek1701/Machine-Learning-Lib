@@ -6,10 +6,11 @@
 #include <iomanip>
 #include <map>  
 #include <algorithm>
+#include <numeric>
 
 #include "ActFun.h"
 #include "Layer.h"
-#include "SpecificLayers.h"
+#include "SpecificLayers.h" 
 
 #include <Eigen/Dense>
 
@@ -30,8 +31,10 @@ public:
 	void showLayers() const;
 	void setCalcOrder();
 	void setLearningOrder();
-	//void setInput(const egn::Matrix<double, egn::Dynamic, 1>&);
-	//void setTargetOutput(const egn::Matrix<double, egn::Dynamic, 1>&);
-
+	void setInput(const egn::Matrix<double, egn::Dynamic, 1>&);
+	void setTargetOutput(const egn::Matrix<double, egn::Dynamic, 1>&);
+	void calcOutput();
+	void correctWeights();
+	void showOutput() const;
 };
 
