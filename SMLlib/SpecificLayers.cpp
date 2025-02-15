@@ -1,4 +1,3 @@
-
 #include "SpecificLayers.h"
 
 void ConstLayer::calcOutput()
@@ -69,4 +68,27 @@ void OutputLayer::setTargetOutput(egn::Matrix<double, egn::Dynamic, 1> m)
 void InputLayer::setInput(egn::Matrix<double, egn::Dynamic, 1> in)
 {
     output = in;
+}
+
+
+
+HiddenLayer::HiddenLayer(int n, af::afType f, double e)
+    : Layer(n, f, e)
+{
+}
+HiddenLayer::HiddenLayer()
+    : HiddenLayer(1, af::linear, 0.1)
+{
+}
+HiddenLayer::HiddenLayer(int n)
+    : HiddenLayer(n, af::linear, 0.1)
+{
+}
+HiddenLayer::HiddenLayer(int n, double e)
+    : HiddenLayer(n, af::linear, e)
+{
+}
+HiddenLayer::HiddenLayer(int n, af::afType f)
+    : HiddenLayer(n, f, 0.1)
+{
 }

@@ -73,6 +73,12 @@ int Layer::getN() const
 
 void Layer::connectBack(Layer* pl)
 {
+    if (std::find(this->prev_layers.begin(), this->prev_layers.end(), pl) != this->prev_layers.end())
+    {
+        std::cout << "Conncetion exists" << std::endl;
+        return;
+    }
+
     this->prev_layers.push_back(pl);
     pl->next_layers.push_back(this);
     this->weight.push_back(egn::MatrixXd(pl->getN(), this->getN()));
@@ -87,7 +93,7 @@ void Layer::showOutput() const
 
 void Layer::showLayer() const
 {
-    std::cout << "---\nLAYER:\t" << this << std::endl;
+    std::cout << "---\n"<<"Layer"<< "\t" << this << std::endl;
     auto w = weight.begin();
     for (auto l : prev_layers)
     {

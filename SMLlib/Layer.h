@@ -26,6 +26,7 @@ protected:
     af::afType afp = af::linear;
     af::afType afp_der = af::linear_der;
     double eta = 0.1;
+    //const std::string name = "Layer";
 public:
     explicit Layer();
     virtual ~Layer();

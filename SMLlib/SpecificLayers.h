@@ -4,15 +4,28 @@
 
 class ConstLayer : public Layer
 {
+//protected:
+    //const std::string name = "Const Layer";
 public:
     explicit ConstLayer() : Layer() {}
     explicit ConstLayer(int nn);// : Layer(nn) {}
     virtual void calcOutput() override;
 };
 
+class HiddenLayer : public Layer
+{
+public:
+    explicit HiddenLayer();
+    explicit HiddenLayer(int);
+    explicit HiddenLayer(int, double);
+    explicit HiddenLayer(int, af::afType);
+    explicit HiddenLayer(int, af::afType, double);
+};
+
 class OutputLayer : public Layer
 {
-private:
+protected:
+    //const std::string name = "Output Layer";
     egn::Matrix<double, egn::Dynamic, 1> target;
 public:
     explicit OutputLayer();
@@ -28,6 +41,8 @@ public:
 
 class InputLayer : public Layer
 {
+//protected:
+    //const std::string name = "Input Layer";
 public:
     explicit InputLayer() : Layer() {}
     explicit InputLayer(int nn);// : Layer(nn) {}

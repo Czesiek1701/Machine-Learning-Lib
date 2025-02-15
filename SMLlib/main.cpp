@@ -2,7 +2,7 @@
 #include "SMLNetwork.h"
 #include <numeric>
 
-float refFun(float x)
+double refFun(float x)
 {
 	//x = (-x);
 	//return (1-(x-0.2) * (x-0.5) - 0.5*(x-0.5)*(x - 0.5))*0.5+0.2;
@@ -23,8 +23,21 @@ float refFun(float x)
 	//return af::sigmoid(x);
 }
 
+namespace egn = Eigen;
+
 int main()
 {
+	NNetwork nnet(1, { 3,1 }, true, { af::sigmoid, af::linear }, { 0.1 });
+	
+	//nnet.setInput(egn::Matrix<double, 1, 1>(-2));
+	//nnet.setTargetOutput(egn::Matrix<double, 1, 1>(-2));
+
+
+	nnet.showLayers();
+	return 0;
+}
+
+	/*
 	std::vector<Layer*> layers;
 
 	InputLayer li = InputLayer(1);
@@ -112,5 +125,4 @@ int main()
 	}
 
 	return 0;
-
-}
+	*/
