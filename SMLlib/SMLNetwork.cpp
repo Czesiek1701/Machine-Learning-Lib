@@ -68,14 +68,68 @@ NNetwork::NNetwork(int input_size, std::vector<int> neuron_nums, bool connect, s
 
 void NNetwork::setCalcOrder()
 {
-	calc_order = std::vector<int>(layers_all.size());
-	std::iota(calc_order.begin(), calc_order.end(), 0); // !!!!!
+	//calc_order = std::vector<int>(layers_all.size());
+	//std::iota(calc_order.begin(), calc_order.end(), 0); // !!!!!
+	calc_order.clear();
+	unvisited = layers_all;
+
+	this->setCalcOrder(output_layer.get());
+}
+
+void NNetwork::setCalcOrder(Layer* layer)
+{
+	for (auto pL : layer->prev_layers)
+	{
+		setCalcOrder(pL);
+	}
+	if (std::find(unvisited.begin(), unvisited.end(), layer) != unvisited.end())
+	{
+		unvisited.erase(std::find(unvisited.begin(), unvisited.end(), layer));
+		//std::cout << getLayerIndex(layer) << std::endl;
+		calc_order.push_back(layer);
+	}
+}
+
+void NNetwork::showCalcOrder()
+{
+	for (auto layer : calc_order)
+	{
+		std::cout << getLayerIndex(layer) << " ";
+	}
+	std::cout << std::endl;
 }
 
 void NNetwork::setLearningOrder()
 {
-	learning_order = calc_order;
-	std::reverse(calc_order.begin(), calc_order.end()); // !!!!!
+	//learning_order = calc_order;
+	//std::reverse(calc_order.begin(), calc_order.end()); // !!!!!
+	learning_order.clear();
+	unvisited = layers_all;
+	this->setLearningOrder(input_layer.get());
+	learning_order.push_back(const_layer.get());
+}
+
+void NNetwork::setLearningOrder(Layer* layer)
+{
+	for (auto nL : layer->next_layers)
+	{
+		setLearningOrder(nL);
+	}
+	if (std::find(unvisited.begin(), unvisited.end(), layer) != unvisited.end())
+	{
+		unvisited.erase(std::find(unvisited.begin(), unvisited.end(), layer));
+		//std::cout << getLayerIndex(layer) << std::endl;
+		learning_order.push_back(layer);
+	}
+}
+
+void NNetwork::showLearningOrder()
+{
+	for (auto layer : learning_order)
+	{
+		std::cout << getLayerIndex(layer) << " ";
+	}
+	std::cout << std::endl;
 }
 
 
@@ -95,34 +149,124 @@ void NNetwork::showLayers() const
 {
 	for (int ln = 0; ln < layers_all.size(); ++ln)
 	{
-		std::cout << "ln" << std::endl;
+		std::cout << "--- LAYER: " << ln << std::endl;
 		layers_all[ln]->showLayer();
 	}
 }
 
 void NNetwork::calcOutput()
 {
-	for (auto ln : calc_order)
+	for (auto layer : calc_order)
 	{
 		//std::cout << ln << ", ";
-		layers_all[ln]->calcOutput();
+		layer->calcOutput();
 	}
 	//std::cout << std::endl;
 }
 
 void NNetwork::correctWeights()
 {
-	for (auto ln : learning_order)
+	for (auto layer: learning_order)
 	{
 		//std::cout << ln << ", ";
-		layers_all[ln]->calcSigma();
-		layers_all[ln]->calcDelta();
-		layers_all[ln]->correctAllWeights();
+		layer->calcSigma();
+		layer->calcDelta();
+		layer->correctAllWeights();
 	}
 	//std::cout << std::endl;
+}
+
+void NNetwork::correctWeightsOneByOne()
+{
+	for (auto layer : learning_order)
+	{
+		//std::cout << ln << ", ";
+		layer->calcSigma();
+		layer->calcDelta();
+		layer->correctAllWeights();
+	}
 }
 
 void NNetwork::showOutput() const
 {
 	output_layer->showOutput();
+}
+
+void NNetwork::deleteLayer(int n)
+{
+	if (n<2 || n>=layers_all.size() - 1)
+	{
+		std::cout << "No layer to delete" << std::endl;
+		return;
+	}
+
+	Layer* deleting_Layer = layers_all[n];
+
+	//std::remove(layers_all.begin(), layers_all.end(), deleting_Layer);
+
+	layers_all.erase(std::find(layers_all.begin(), layers_all.end(), deleting_Layer));
+	
+	hidden_layers.erase( std::find_if(hidden_layers.begin(), hidden_layers.end(), 
+		[deleting_Layer](std::unique_ptr<HiddenLayer>& up) { return up.get()==deleting_Layer; }
+		) );
+
+	layers_all[n]->connectBack(layers_all[n - 1]);
+	
+	setCalcOrder();
+	setLearningOrder();
+
+}
+
+Layer* NNetwork::addLayer(HiddenLayer hl)
+{
+	hidden_layers.push_back( std::make_unique<HiddenLayer>(HiddenLayer(hl)) );
+	auto nLit = layers_all.insert(layers_all.end(), hidden_layers.back().get());
+	(*nLit)->connectBack(const_layer.get());
+	return *nLit;
+}
+
+void NNetwork::connectLayers(Layer* prev, Layer* next)
+{
+	next->connectBack(prev);
+}
+
+void NNetwork::connectLayers(int prev, int next)
+{
+	connectLayers(layers_all[prev], layers_all[next]);
+}
+
+Layer* NNetwork::insertLayerBetween(HiddenLayer hL, int prev, int next)
+{
+	Layer* nL = addLayer(hL);
+	connectLayers(prev, getLayerIndex(nL));
+	connectLayers(getLayerIndex(nL), next);
+	return nL;
+}
+
+void NNetwork::showConnections()
+{
+	for (auto layer : calc_order)
+	{
+		for (auto prev : layer->prev_layers)
+		{
+			std::cout << getLayerIndex(prev) << " ";
+		}
+		std::cout << "-> " << getLayerIndex(layer) << " -> ";
+		for (auto next : layer->next_layers)
+		{
+			std::cout << getLayerIndex(next) << " ";
+		}
+		std::cout << std::endl;
+	}
+
+}
+
+Layer* NNetwork::getOutputLayer()
+{
+	return output_layer.get();
+}
+
+int NNetwork::getLayerIndex(Layer* layer)
+{
+	return std::find(layers_all.begin(), layers_all.end(), layer) - layers_all.begin();
 }

@@ -29,28 +29,35 @@ namespace egn = Eigen;
 
 int main()
 {
-	NNetwork nnet(1, { 10,10,3,1 }, true, { af::tanh, af::sign, af::sigmoid, af::linear }, { 0.1 });
+	NNetwork nnet(1, { 1,1,1,1 }, true, { af::tanh,af::tanh,af::tanh,af::linear }, { 0.05 });
 
-	nnet.setCalcOrder();	// !!!!!
-	nnet.setLearningOrder(); // !!!
-
-	nnet.setInput(egn::Matrix<double, 1, 1>(-2));
-	nnet.setTargetOutput(egn::Matrix<double, 1, 1>(-100));
+	nnet.insertLayerBetween(HiddenLayer(3), 1, 4);
+	nnet.connectLayers(3, 5);
 
 
-	//nnet.showLayers();
+	nnet.showLayers();
 
-	for (int i = 0; i < 100; i++)
+	nnet.setCalcOrder();
+	nnet.showCalcOrder();
+
+	nnet.setLearningOrder();
+	nnet.showLearningOrder();
+
+	nnet.showConnections();
+
+
+	for (int i = 0; i < 1000; i++)
 	{
-		nnet.correctWeights();
+		float input = getRandDouble();
+		float tar_output = input * input;
+		nnet.setInput(egn::Matrix<double, 1, 1>(input));
+		nnet.setTargetOutput(egn::Matrix<double, 1, 1>(tar_output));
 		nnet.calcOutput();
 		nnet.showOutput();
+		nnet.correctWeights();
 	}
 
-	//nnet.showLayers();
-
-
-
+	nnet.showLayers();
 
 	return 0;
 }

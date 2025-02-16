@@ -11,6 +11,8 @@ namespace egn = Eigen;
 
 double getRandDouble();
 
+class NNetwork;
+
 class Layer
 {
 protected:
@@ -40,5 +42,8 @@ public:
     virtual void calcDelta();
     virtual void correctAllWeights();
     virtual std::string getName() const;
+    void disconnect(Layer*);
+    void presentAsNode();
 
+    friend NNetwork;
 };

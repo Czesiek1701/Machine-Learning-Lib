@@ -12,6 +12,19 @@ double getRandDouble()
 
 Layer::~Layer()
 {
+    //std::cout << "Layer deleted" << std::endl;
+    for (auto pL : prev_layers)
+    { 
+        pL->next_layers.erase(
+            std::find(pL->next_layers.begin(), pL->next_layers.end(), this)
+        );
+    }
+    for (auto nL : next_layers)
+    {
+        int to_del = std::find(nL->prev_layers.begin(), nL->prev_layers.end(), this) - nL->prev_layers.begin();
+        nL->prev_layers.erase(nL->prev_layers.begin()+to_del);
+        nL->weight.erase( nL->weight.begin() + to_del );
+    }
 
 }
 
@@ -184,4 +197,30 @@ void Layer::correctAllWeights()
         *w += eta * (l->output) * delta.transpose();
         ++w;
     }
+}
+
+void Layer::disconnect(Layer* to_disc)
+{
+    if (std::find(this->prev_layers.begin(), this->prev_layers.end(), to_disc) != this->prev_layers.end())
+    {
+        int to_del = std::find(this->prev_layers.begin(), this->prev_layers.end(), to_disc) - this->prev_layers.begin();
+        this->prev_layers.erase(this->prev_layers.begin() + to_del);
+        //std::cout << typeid( (nL->prev_layers.begin())).name() << std::endl;
+        //std::cout << typeid(to_del).name() << std::endl;
+
+        //int dif = to_del - nL->prev_layers.begin();
+        this->weight.erase(this->weight.begin() + to_del);
+    }
+}
+
+void Layer::presentAsNode()
+{
+    
+    std::cout << this->output << std::endl;
+
+    for (auto nL : next_layers)
+    {
+        nL->presentAsNode();
+    }
+
 }

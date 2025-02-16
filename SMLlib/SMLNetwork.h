@@ -19,22 +19,40 @@
 class NNetwork
 {
 private:
-	std::vector<Layer*> layers_all; // 1-input , 0-const, last- output
+	std::vector<Layer*> layers_all; // 1-input , 0-const
 	std::unique_ptr<ConstLayer> const_layer;
 	std::unique_ptr<InputLayer> input_layer;
 	std::unique_ptr<OutputLayer> output_layer;
 	std::vector<std::unique_ptr<HiddenLayer>> hidden_layers;
-	std::vector<int> learning_order;
-	std::vector<int> calc_order;
+	std::vector<Layer*> learning_order;
+	std::vector<Layer*> calc_order;
+	std::vector<Layer*> unvisited;
 public:
 	NNetwork(int,std::vector<int>, bool, std::vector<af::afType>, std::vector<double>); // create and add to layers
 	void showLayers() const;
 	void setCalcOrder();
+	void setCalcOrder(Layer*);
 	void setLearningOrder();
+	void setLearningOrder(Layer*);
 	void setInput(const egn::Matrix<double, egn::Dynamic, 1>&);
 	void setTargetOutput(const egn::Matrix<double, egn::Dynamic, 1>&);
 	void calcOutput();
 	void correctWeights();
+	void correctWeightsOneByOne(); // !!!!!
 	void showOutput() const;
+	void deleteLayer(int);
+	int getLayerIndex(Layer*);
+	Layer* getOutputLayer();
+
+	Layer* addLayer(HiddenLayer);
+	void connectLayers(Layer*, Layer*);
+	void connectLayers(int, int);
+	Layer* insertLayerBetween(HiddenLayer, int, int);
+
+	void showConnections();
+
+	void showCalcOrder();
+	void showLearningOrder();
+
 };
 
