@@ -1,3 +1,6 @@
+// =======================
+// Author: Grzegorz Czaja
+// =======================
 # include "SMLNetwork.h"
 # include "SpecificLayers.h"
 

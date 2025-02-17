@@ -1,3 +1,6 @@
+// =======================
+// Author: Grzegorz Czaja
+// =======================
 #include "Layer.h"
 
 double getRandDouble()

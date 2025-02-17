@@ -1,3 +1,6 @@
+// =======================
+// Author: Grzegorz Czaja
+// =======================
 #pragma once
 
 #include <cmath>

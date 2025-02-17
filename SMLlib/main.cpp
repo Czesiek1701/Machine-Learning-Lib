@@ -1,4 +1,7 @@
-﻿#include <iostream>
+﻿// =======================
+// Author: Grzegorz Czaja
+// =======================
+#include <iostream>
 #include "SMLNetwork.h"
 #include <numeric>
 
@@ -55,7 +58,7 @@ int main()
 		nnet.setTargetOutput(egn::Matrix<double, 1, 1>(tar_output));
 		nnet.calcOutput();
 		nnet.correctWeightsOneByOne(1);
-		std::cout << std::showpos << std::setprecision(6) << input << ": "<< tar_output - nnet.getOutputLayer()->getOutput()[0] << std::endl;
+		std::cout << std::fixed << std::showpos << std::setprecision(6) << input << ": "<< tar_output - nnet.getOutputLayer()->getOutput()[0] << std::endl;
 	}
 
 	//nnet.showLayers();

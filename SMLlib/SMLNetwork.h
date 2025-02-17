@@ -1,6 +1,6 @@
-
+// =======================
 // Author: Grzegorz Czaja
-
+// =======================
 #pragma once
 
 #include <iostream>

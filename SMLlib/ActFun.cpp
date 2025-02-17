@@ -1,3 +1,6 @@
+// =======================
+// Author: Grzegorz Czaja
+// =======================
 #include "ActFun.h"
 
 af::afType af::getFunDer(af::afType fun)

@@ -1,3 +1,6 @@
+// =======================
+// Author: Grzegorz Czaja
+// =======================
 #include "SpecificLayers.h"
 
 void ConstLayer::calcOutput()
