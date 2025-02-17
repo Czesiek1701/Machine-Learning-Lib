@@ -1,5 +1,9 @@
 # smllib
 
-![obraz](https://github.com/user-attachments/assets/4eae27d8-782f-4fc8-a12a-c384534c8062)
+![obraz](https://github.com/user-attachments/assets/62b69681-6fd3-4c0a-91a1-8c0caf261110)
+
+![obraz](https://github.com/user-attachments/assets/d9666178-0d1e-46e6-a94d-e6835467d72a)
+
+
 
 
