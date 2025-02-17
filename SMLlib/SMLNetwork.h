@@ -1,3 +1,6 @@
+
+// Author: Grzegorz Czaja
+
 #pragma once
 
 #include <iostream>
@@ -37,12 +40,14 @@ public:
 	void setInput(const egn::Matrix<double, egn::Dynamic, 1>&);
 	void setTargetOutput(const egn::Matrix<double, egn::Dynamic, 1>&);
 	void calcOutput();
-	void correctWeights();
-	void correctWeightsOneByOne(); // !!!!!
+	void correctWeightsAll();
+	void correctWeightsOneByOne(int);
+	void correctWeightsWinnigOne();
 	void showOutput() const;
 	void deleteLayer(int);
 	int getLayerIndex(Layer*);
-	Layer* getOutputLayer();
+	OutputLayer* getOutputLayer();
+	Layer* getLayer(int);
 
 	Layer* addLayer(HiddenLayer);
 	void connectLayers(Layer*, Layer*);

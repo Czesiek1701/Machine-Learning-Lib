@@ -41,9 +41,11 @@ public:
     virtual void calcSigma();
     virtual void calcDelta();
     virtual void correctAllWeights();
+    virtual void correctNeuronWeight(int);
     virtual std::string getName() const;
     void disconnect(Layer*);
     void presentAsNode();
+    //virtual egn::Matrix<double, egn::Dynamic, 1> getOutput();
 
     friend NNetwork;
 };

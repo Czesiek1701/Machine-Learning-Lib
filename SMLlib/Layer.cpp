@@ -172,7 +172,6 @@ void Layer::calcSigma()
     }
 }
 
-
 void Layer::calcDelta()
 {
     //net = 
@@ -199,6 +198,25 @@ void Layer::correctAllWeights()
     }
 }
 
+void Layer::correctNeuronWeight(int nid)
+{
+    //std::cout << "weight correction: " << this << std::endl;
+    auto w = weight.begin();
+    for (auto l : prev_layers)
+    {
+        /*std::cout << (*w) << std::endl;
+        std::cout << (*w)(egn::all, nid) << std::endl;
+        std::cout << (l->output) << std::endl;
+        std::cout << (l->output)(egn::all, nid) << std::endl;
+        std::cout << (delta.transpose()) << std::endl;
+        std::cout << (delta.transpose())(egn::all, nid) << std::endl;*/
+        (*w)(egn::all,nid) += eta * (l->output) * delta(nid,egn::all).transpose();
+        ++w;
+    }
+}
+
+
+
 void Layer::disconnect(Layer* to_disc)
 {
     if (std::find(this->prev_layers.begin(), this->prev_layers.end(), to_disc) != this->prev_layers.end())
@@ -224,3 +242,8 @@ void Layer::presentAsNode()
     }
 
 }
+
+//egn::Matrix<double, egn::Dynamic, 1> Layer::getOutput()
+//{
+//    return output;
+//}

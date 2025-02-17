@@ -80,14 +80,13 @@ void NNetwork::setCalcOrder(Layer* layer)
 {
 	for (auto pL : layer->prev_layers)
 	{
-		setCalcOrder(pL);
+		if (std::find(unvisited.begin(), unvisited.end(), pL) != unvisited.end())
+		{
+			unvisited.erase(std::find(unvisited.begin(), unvisited.end(), pL));
+			setCalcOrder(pL);
+		}
 	}
-	if (std::find(unvisited.begin(), unvisited.end(), layer) != unvisited.end())
-	{
-		unvisited.erase(std::find(unvisited.begin(), unvisited.end(), layer));
-		//std::cout << getLayerIndex(layer) << std::endl;
-		calc_order.push_back(layer);
-	}
+	calc_order.push_back(layer);
 }
 
 void NNetwork::showCalcOrder()
@@ -113,14 +112,14 @@ void NNetwork::setLearningOrder(Layer* layer)
 {
 	for (auto nL : layer->next_layers)
 	{
-		setLearningOrder(nL);
+		if (std::find(unvisited.begin(), unvisited.end(), nL) != unvisited.end())
+		{
+			unvisited.erase(std::find(unvisited.begin(), unvisited.end(), nL));
+			setLearningOrder(nL);
+		}
 	}
-	if (std::find(unvisited.begin(), unvisited.end(), layer) != unvisited.end())
-	{
-		unvisited.erase(std::find(unvisited.begin(), unvisited.end(), layer));
 		//std::cout << getLayerIndex(layer) << std::endl;
-		learning_order.push_back(layer);
-	}
+	learning_order.push_back(layer);
 }
 
 void NNetwork::showLearningOrder()
@@ -164,11 +163,12 @@ void NNetwork::calcOutput()
 	//std::cout << std::endl;
 }
 
-void NNetwork::correctWeights()
+void NNetwork::correctWeightsAll()
 {
 	for (auto layer: learning_order)
 	{
 		//std::cout << ln << ", ";
+		this->calcOutput();
 		layer->calcSigma();
 		layer->calcDelta();
 		layer->correctAllWeights();
@@ -176,14 +176,41 @@ void NNetwork::correctWeights()
 	//std::cout << std::endl;
 }
 
-void NNetwork::correctWeightsOneByOne()
+void NNetwork::correctWeightsOneByOne(int itnum = 1)
 {
 	for (auto layer : learning_order)
 	{
-		//std::cout << ln << ", ";
-		layer->calcSigma();
-		layer->calcDelta();
-		layer->correctAllWeights();
+		for (int nid = 0; nid < layer->getN(); nid++)
+		{
+			for (int i = 0; i < itnum; i++)
+			{
+				this->calcOutput();
+				for(auto l: learning_order)
+				{
+					l->calcSigma();
+					l->calcDelta();
+				}
+				layer->correctNeuronWeight(nid);
+			}
+		}
+	}
+}
+
+void NNetwork::correctWeightsWinnigOne()
+{
+	for (auto layer : learning_order)
+	{
+		// STD FIND
+		for (int nid = 0; nid < layer->getN(); nid++)
+		{
+			this->calcOutput();
+			for (auto l : learning_order)
+			{
+				l->calcSigma();
+				l->calcDelta();
+			}
+			layer->correctNeuronWeight(nid);
+		}
 	}
 }
 
@@ -261,7 +288,12 @@ void NNetwork::showConnections()
 
 }
 
-Layer* NNetwork::getOutputLayer()
+Layer* NNetwork::getLayer(int nid)
+{
+	return layers_all[nid];
+}
+
+OutputLayer* NNetwork::getOutputLayer()
 {
 	return output_layer.get();
 }

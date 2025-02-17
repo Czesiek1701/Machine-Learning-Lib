@@ -29,35 +29,36 @@ namespace egn = Eigen;
 
 int main()
 {
-	NNetwork nnet(1, { 1,1,1,1 }, true, { af::tanh,af::tanh,af::tanh,af::linear }, { 0.05 });
+	NNetwork nnet(1, { 5,3,1 }, true, { af::tanh }, { 0.3 });
 
-	nnet.insertLayerBetween(HiddenLayer(3), 1, 4);
-	nnet.connectLayers(3, 5);
+	Layer* nl = nnet.insertLayerBetween(HiddenLayer(5, af::linear, 0.3), 2,3);
+	nnet.connectLayers(2, 5);
 
-
+	nnet.showConnections();
 	nnet.showLayers();
 
 	nnet.setCalcOrder();
+	nnet.showConnections();
 	nnet.showCalcOrder();
+
 
 	nnet.setLearningOrder();
 	nnet.showLearningOrder();
 
-	nnet.showConnections();
-
+	nnet.showLayers();
 
 	for (int i = 0; i < 1000; i++)
 	{
 		float input = getRandDouble();
-		float tar_output = input * input;
+		float tar_output = input*input*input;
 		nnet.setInput(egn::Matrix<double, 1, 1>(input));
 		nnet.setTargetOutput(egn::Matrix<double, 1, 1>(tar_output));
 		nnet.calcOutput();
-		nnet.showOutput();
-		nnet.correctWeights();
+		nnet.correctWeightsOneByOne(1);
+		std::cout << std::showpos << std::setprecision(6) << input << ": "<< tar_output - nnet.getOutputLayer()->getOutput()[0] << std::endl;
 	}
 
-	nnet.showLayers();
+	//nnet.showLayers();
 
 	return 0;
 }
