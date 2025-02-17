@@ -30,6 +30,8 @@ private:
 	std::vector<Layer*> learning_order;
 	std::vector<Layer*> calc_order;
 	std::vector<Layer*> unvisited;
+	double diff_error_output = 0;
+	double diff_error_sigma = 0;
 public:
 	NNetwork(int,std::vector<int>, bool, std::vector<af::afType>, std::vector<double>); // create and add to layers
 	void showLayers() const;
@@ -40,10 +42,16 @@ public:
 	void setInput(const egn::Matrix<double, egn::Dynamic, 1>&);
 	void setTargetOutput(const egn::Matrix<double, egn::Dynamic, 1>&);
 	void calcOutput();
+	void calcOutput(int);
+	void calcSigma();
+	void calcDelta();
 	void correctWeightsAll();
 	void correctWeightsOneByOne(int);
+	void correctWeightsOneByOne();
 	void correctWeightsWinnigOne();
 	void showOutput() const;
+	void showOutputs();
+	void showSigmas();
 	void deleteLayer(int);
 	int getLayerIndex(Layer*);
 	OutputLayer* getOutputLayer();

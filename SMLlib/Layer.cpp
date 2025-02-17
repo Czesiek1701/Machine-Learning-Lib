@@ -62,6 +62,8 @@ Layer::Layer(int n)
 
 void Layer::calcOutput()
 {
+    difOutput = -output;
+
     auto wp = weight.begin();
     net = bias;
     for (const Layer* const lp : prev_layers)
@@ -72,6 +74,10 @@ void Layer::calcOutput()
     }
     output = net;
     for (auto& o : output) { o = afp(o); }
+
+    difOutput += output;
+    difOutput = difOutput.cwiseProduct(difOutput);
+    //std::cout << "kwadrat: " << output_dif.transpose() << std::endl;
 }
 
 int Layer::getN() const
@@ -157,6 +163,8 @@ void Layer::showLayer() const
 
 void Layer::calcSigma()
 {
+    difSigma = -sigma;
+
     //std::cout << "sigma " << this << std::endl;
     this->sigma.setConstant(0);
     for (auto nl : next_layers)
@@ -173,6 +181,9 @@ void Layer::calcSigma()
         //std::cout << nl->weight[wn] << std::endl;
         this->sigma += nl->weight[wn] * nl->sigma;
     }
+
+    difSigma += sigma;
+    difSigma = difSigma.cwiseProduct(difSigma);
 }
 
 void Layer::calcDelta()

@@ -16,6 +16,8 @@ double getRandDouble();
 
 class NNetwork;
 
+
+
 class Layer
 {
 protected:
@@ -27,6 +29,8 @@ protected:
     egn::Matrix<double, egn::Dynamic, 1> output;
     egn::Matrix<double, egn::Dynamic, 1> sigma;
     egn::Matrix<double, egn::Dynamic, 1> delta;
+    egn::Matrix<double, egn::Dynamic, 1> difOutput;
+    egn::Matrix<double, egn::Dynamic, 1> difSigma;
     std::vector<Layer*> next_layers;
     af::afType afp = af::linear;
     af::afType afp_der = af::linear_der;

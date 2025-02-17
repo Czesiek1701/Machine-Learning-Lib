@@ -14,6 +14,7 @@ public:
     explicit ConstLayer(int nn);// : Layer(nn) {}
     virtual void calcOutput() override;
     virtual std::string getName() const override;
+    virtual void calcSigma() { return; };
 };
 
 class HiddenLayer : public Layer 
@@ -54,4 +55,5 @@ public:
     virtual void calcOutput() override;
     void setInput(egn::Matrix<double, egn::Dynamic, 1>);
     virtual std::string getName() const override;
+    virtual void calcSigma() { return; };
 };

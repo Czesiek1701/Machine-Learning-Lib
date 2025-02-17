@@ -158,12 +158,60 @@ void NNetwork::showLayers() const
 
 void NNetwork::calcOutput()
 {
-	for (auto layer : calc_order)
+	diff_error_output = DBL_MAX;
+	while (diff_error_output > 0.01)
 	{
-		//std::cout << ln << ", ";
-		layer->calcOutput();
+		diff_error_output = 0;
+		for (auto layer : calc_order)
+		{
+			layer->calcOutput();
+			diff_error_output += layer->difOutput.sum();
+			//std::cout << "output sum: " << layer->output.sum() << std::endl;
+		}
+		//this->showSigmas();
+		//this->showOutputs();
+		//std::cout << "calc iter error"<< diff_error << std::endl;
 	}
-	//std::cout << std::endl;
+}
+
+void NNetwork::calcOutput(int nit)
+{
+	for (int i = 0; i < nit; i++)
+	{
+		for (auto layer : calc_order)
+		{
+			//std::cout << ln << ", ";
+			layer->calcOutput();
+		}
+		//std::cout << std::endl;
+	}
+}
+
+void NNetwork::calcSigma()
+{
+	diff_error_sigma = DBL_MAX;
+	while (diff_error_sigma > 0.01)
+	{
+		diff_error_sigma = 0;
+		for (auto layer : learning_order)
+		{
+			layer->calcSigma();
+			diff_error_sigma += layer->difSigma.sum();
+			//std::cout << "output sum: " << layer->difSigma << std::endl;
+		}
+		//this->showSigmas();
+		//this->showOutputs();
+		//std::cout << "calc iter error sigma "<< diff_error_sigma << std::endl;
+	}
+}
+
+void NNetwork::calcDelta()
+{
+	for (auto layer : learning_order)
+	{
+		layer->calcDelta();
+		//std::cout << "output sum: " << layer->output.sum() << std::endl;
+	}
 }
 
 void NNetwork::correctWeightsAll()
@@ -179,7 +227,7 @@ void NNetwork::correctWeightsAll()
 	//std::cout << std::endl;
 }
 
-void NNetwork::correctWeightsOneByOne(int itnum = 1)
+void NNetwork::correctWeightsOneByOne(int itnum)
 {
 	for (auto layer : learning_order)
 	{
@@ -199,21 +247,38 @@ void NNetwork::correctWeightsOneByOne(int itnum = 1)
 	}
 }
 
+void NNetwork::correctWeightsOneByOne()
+{
+	for (auto layer : learning_order)
+	{
+		for (int nid = 0; nid < layer->getN(); nid++)
+		{
+			//std::cout << "=== Layer: " << getLayerIndex(layer) << " Neuron: " << nid << " ===" << std::endl;
+			//diff_error_sigma = DBL_MAX;
+			//while (diff_error_sigma > 0.01)
+			{
+				this->calcOutput();
+				this->calcSigma();
+				this->calcDelta();
+				layer->correctNeuronWeight(nid);
+			}
+		}
+	}
+}
+
 void NNetwork::correctWeightsWinnigOne()
 {
 	for (auto layer : learning_order)
 	{
-		// STD FIND
-		for (int nid = 0; nid < layer->getN(); nid++)
-		{
-			this->calcOutput();
-			for (auto l : learning_order)
-			{
-				l->calcSigma();
-				l->calcDelta();
-			}
-			layer->correctNeuronWeight(nid);
-		}
+		//for (int nid = 0; nid < layer->getN(); nid++)
+		//this->showOutputs();
+		int win_neuron;
+		(layer->output.cwiseProduct(layer->output)).maxCoeff(&win_neuron);
+		//std::cout << win_neuron << std::endl;
+		this->calcOutput();
+		this->calcSigma();
+		this->calcDelta();
+		layer->correctNeuronWeight(win_neuron);
 	}
 }
 
@@ -304,4 +369,22 @@ OutputLayer* NNetwork::getOutputLayer()
 int NNetwork::getLayerIndex(Layer* layer)
 {
 	return std::find(layers_all.begin(), layers_all.end(), layer) - layers_all.begin();
+}
+
+void NNetwork::showOutputs()
+{
+	for (auto layer : calc_order)
+	{
+		std::cout << getLayerIndex(layer) << ":\t" << layer->output.transpose() << std::endl;
+	}
+
+}
+
+void NNetwork::showSigmas()
+{
+	for (auto layer : calc_order)
+	{
+		std::cout << getLayerIndex(layer) << ":\t" << layer->sigma.transpose() << std::endl;
+	}
+
 }

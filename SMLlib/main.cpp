@@ -4,8 +4,9 @@
 #include <iostream>
 #include "SMLNetwork.h"
 #include <numeric>
+#include <fstream>
 
-double refFun(float x)
+double refFun(double x)
 {
 	//x = (-x);
 	//return (1-(x-0.2) * (x-0.5) - 0.5*(x-0.5)*(x - 0.5))*0.5+0.2;
@@ -18,6 +19,7 @@ double refFun(float x)
 	//return af::tanh(5*(x-0.5));
 	//if (x < 0.2 && x > -0.4) return 0.6;
 	//return 0;
+	return ( - x) * (x - 0.5) * (x + 0.2);
 	if (x < -0.5) return 1;
 	if (x < 0.1) return -0.6; 
 	if (x < 0.4) return 0.1;
@@ -32,10 +34,10 @@ namespace egn = Eigen;
 
 int main()
 {
-	NNetwork nnet(1, { 5,3,1 }, true, { af::tanh }, { 0.3 });
+	NNetwork nnet(1, { 5,3,1 }, true, { af::tanh, af::tanh, af::linear }, { 0.1 });
 
-	Layer* nl = nnet.insertLayerBetween(HiddenLayer(5, af::linear, 0.3), 2,3);
-	nnet.connectLayers(2, 5);
+	//Layer* nl = nnet.insertLayerBetween(HiddenLayer(5, af::linear, 0.3), 2,3);
+	nnet.connectLayers(4, 2); //backward link
 
 	nnet.showConnections();
 	nnet.showLayers();
@@ -50,16 +52,43 @@ int main()
 
 	nnet.showLayers();
 
+
+	// TESTING
 	for (int i = 0; i < 1000; i++)
 	{
 		float input = getRandDouble();
-		float tar_output = input*input*input;
+		float tar_output = refFun(input); // this is not smart
 		nnet.setInput(egn::Matrix<double, 1, 1>(input));
 		nnet.setTargetOutput(egn::Matrix<double, 1, 1>(tar_output));
+
+		nnet.correctWeightsAll();
+		nnet.correctWeightsOneByOne(); // not always works
+		nnet.correctWeightsWinnigOne();
+
 		nnet.calcOutput();
-		nnet.correctWeightsOneByOne(1);
-		std::cout << std::fixed << std::showpos << std::setprecision(6) << input << ": "<< tar_output - nnet.getOutputLayer()->getOutput()[0] << std::endl;
+		std::cout << i << ":\t"<< std::fixed << std::showpos << std::setprecision(6) << input << ": " << tar_output - nnet.getOutputLayer()->getOutput()[0] << "\t" <<
+			tar_output<< "\t" << nnet.getOutputLayer()->getOutput()[0] <<  std::endl;
 	}
+
+
+
+	// SAVING RESULTS
+	std::ofstream ofile;
+	ofile.open("res.csv");
+
+	const int NP = 11;
+	std::vector<double> inputV(NP);
+	std::iota(inputV.begin(), inputV.end(), 0);
+	std::for_each(inputV.begin(), inputV.end(), [NP](double& v) {v = -1 + 2*v / (NP - 1); });
+
+	for (auto i : inputV)
+	{
+		nnet.setInput(egn::Matrix<double, 1, 1>(i));
+		nnet.calcOutput();
+		ofile << i << "\t" << refFun(i) << "\t" << nnet.getOutputLayer()->getOutput()[0] << std::endl;
+	}
+
+	ofile.close();
 
 	//nnet.showLayers();
 
