@@ -19,7 +19,7 @@ double refFun(double x)
 	//return af::tanh(5*(x-0.5));
 	//if (x < 0.2 && x > -0.4) return 0.6;
 	//return 0;
-	return ( - x) * (x - 0.5) * (x + 0.2);
+	//return ( - x) * (x - 0.5) * (x + 0.2);
 	if (x < -0.5) return 1;
 	if (x < 0.1) return -0.6; 
 	if (x < 0.4) return 0.1;
@@ -34,10 +34,10 @@ namespace egn = Eigen;
 
 int main()
 {
-	NNetwork nnet(1, { 5,3,1 }, true, { af::tanh, af::tanh, af::linear }, { 0.1 });
+	NNetwork nnet(1, { 8, 8,1 }, true, { af::linear, af::sign, af::linear }, { 0.01 });
 
 	//Layer* nl = nnet.insertLayerBetween(HiddenLayer(5, af::linear, 0.3), 2,3);
-	nnet.connectLayers(4, 2); //backward link
+	//nnet.connectLayers(3, 2); //backward link
 
 	nnet.showConnections();
 	nnet.showLayers();
@@ -52,31 +52,44 @@ int main()
 
 	nnet.showLayers();
 
+	nnet.setInput(egn::Matrix<double, 1, 1>(1));
+	nnet.calcOutput();
+	std::cout << "C" << ":\t" << std::fixed << std::showpos << std::setprecision(6) << "\t" <<
+		"\t" << nnet.getOutputLayer()->getOutput()[0] << std::endl;
 
+	std::vector<double> vin{ -1,-0.51,-0.49,0.09,0.11,0.39,0.41,1 };
 	// TESTING
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < 3000; i++)
 	{
-		float input = getRandDouble();
+		//float input = getRandDouble();
+		float input = vin[((int)(getRandDouble() * 100)) % vin.size()];
 		float tar_output = refFun(input); // this is not smart
 		nnet.setInput(egn::Matrix<double, 1, 1>(input));
 		nnet.setTargetOutput(egn::Matrix<double, 1, 1>(tar_output));
 
+		nnet.calcOutput();
+		//nnet.correctWeightsOneByOne(10); // not always works
+		//nnet.correctWeightsWinnigOne();
 		nnet.correctWeightsAll();
-		nnet.correctWeightsOneByOne(); // not always works
-		nnet.correctWeightsWinnigOne();
 
 		nnet.calcOutput();
 		std::cout << i << ":\t"<< std::fixed << std::showpos << std::setprecision(6) << input << ": " << tar_output - nnet.getOutputLayer()->getOutput()[0] << "\t" <<
 			tar_output<< "\t" << nnet.getOutputLayer()->getOutput()[0] <<  std::endl;
+
+		if(abs(nnet.getOutputLayer()->getOutput()[0] > 100))
+		{
+			break;
+		}
+
 	}
 
-
+	//nnet.showLayers();
 
 	// SAVING RESULTS
 	std::ofstream ofile;
 	ofile.open("res.csv");
 
-	const int NP = 11;
+	const int NP = 31;
 	std::vector<double> inputV(NP);
 	std::iota(inputV.begin(), inputV.end(), 0);
 	std::for_each(inputV.begin(), inputV.end(), [NP](double& v) {v = -1 + 2*v / (NP - 1); });

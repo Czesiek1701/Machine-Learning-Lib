@@ -49,6 +49,10 @@ Layer::Layer(int nn = 1, af::afType lfun = af::linear, double e = 0.1)
     eta = e;
     prev_layers.clear();
     next_layers.clear();
+    for (auto& b : bias)
+    {
+        b = getRandDouble();
+    }
 }
 
 Layer::Layer()
@@ -208,6 +212,7 @@ void Layer::correctAllWeights()
         //std::cout << "deltaW\n";
         //std::cout << eta * l->output * delta.transpose() << std::endl;
         *w += eta * (l->output) * delta.transpose();
+        //*w *= (1 + getRandDouble() / 100);
         ++w;
     }
 }

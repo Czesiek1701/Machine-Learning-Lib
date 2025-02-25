@@ -44,6 +44,7 @@ public:
 	void calcOutput();
 	void calcOutput(int);
 	void calcSigma();
+	void calcSigma(int);
 	void calcDelta();
 	void correctWeightsAll();
 	void correctWeightsOneByOne(int);
