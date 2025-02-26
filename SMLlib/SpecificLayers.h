@@ -40,7 +40,6 @@ public:
     explicit OutputLayer(int, af::afType, double);
     virtual void calcSigma() override;
     void setTargetOutput(egn::Matrix<double, egn::Dynamic, 1>);
-    const egn::Matrix<double, egn::Dynamic, 1>& getOutput();
     const egn::Matrix<double, egn::Dynamic, 1>& getTarget();
     virtual std::string getName() const override;
 };

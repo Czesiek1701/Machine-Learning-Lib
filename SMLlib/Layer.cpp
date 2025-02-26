@@ -8,7 +8,7 @@ double getRandDouble()
     static auto st_time = std::chrono::system_clock::now().time_since_epoch();
     static unsigned int st_seed = std::chrono::duration_cast
         <std::chrono::milliseconds>(st_time).count();
-    st_seed = ((st_seed + 327) * 1567 - 3) % 10000;
+    st_seed = ((st_seed + 32768) * 156769 - 3) % 10000;
     //std::cout << "rand: " << (st_seed / 10000.0) * 2 - 1 << std::endl;
     return  (st_seed / 10000.0) * 2 - 1;
 }
@@ -198,6 +198,14 @@ void Layer::calcDelta()
     delta = delta.cwiseProduct(sigma);
 }
 
+void Layer::calcNeuronDelta(int nid)
+{
+    //net = 
+    delta(nid,egn::all) = net(nid, egn::all);
+    for (auto& d : delta(nid, egn::all)) { d = afp_der(d); }
+    delta(nid, egn::all) = delta(nid, egn::all).cwiseProduct(sigma(nid, egn::all));
+}
+
 void Layer::correctAllWeights()
 {
     //std::cout << "weight correction: " << this << std::endl;
@@ -234,6 +242,30 @@ void Layer::correctNeuronWeight(int nid)
     }
 }
 
+void Layer::calcNeuronSigma(int nid)
+{
+    //difSigma = -sigma;
+
+    //std::cout << "sigma " << this << std::endl;
+    this->sigma(nid, egn::all).setConstant(0);
+    for (auto nl : next_layers)
+    {
+        int wn =
+            std::find(
+                nl->prev_layers.begin(),
+                nl->prev_layers.end(),
+                this
+            ) - nl->prev_layers.begin();
+        //std::cout << "from: " << nl << " : " << wn << std::endl;
+        //std::cout << sigma << std::endl;
+        //std::cout << nl->sigma << std::endl;
+        //std::cout << nl->weight[wn] << std::endl;
+        this->sigma(nid, egn::all) += nl->weight[wn](nid, egn::all) * nl->sigma;
+    }
+
+    //difSigma += sigma;
+    //difSigma = difSigma.cwiseProduct(difSigma);
+}
 
 
 void Layer::disconnect(Layer* to_disc)
@@ -262,6 +294,10 @@ void Layer::presentAsNode()
 
 }
 
+const egn::Matrix<double, egn::Dynamic, 1>& Layer::getOutput()
+{
+    return output;
+}
 //egn::Matrix<double, egn::Dynamic, 1> Layer::getOutput()
 //{
 //    return output;

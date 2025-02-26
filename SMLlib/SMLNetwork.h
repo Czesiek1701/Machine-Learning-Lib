@@ -53,6 +53,8 @@ public:
 	void showOutput() const;
 	void showOutputs();
 	void showSigmas();
+	void showWeights();
+	void showResult();
 	void deleteLayer(int);
 	int getLayerIndex(Layer*);
 	OutputLayer* getOutputLayer();

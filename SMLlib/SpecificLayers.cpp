@@ -41,10 +41,6 @@ OutputLayer::OutputLayer(int n)
 {
 }
 
-const egn::Matrix<double, egn::Dynamic, 1>& OutputLayer::getOutput()
-{
-    return output;
-}
 
 const egn::Matrix<double, egn::Dynamic, 1>& OutputLayer::getTarget()
 {

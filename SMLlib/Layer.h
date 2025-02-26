@@ -46,10 +46,13 @@ public:
     void showOutput() const;
     void showLayer() const;
     virtual void calcSigma();
+    virtual void calcNeuronSigma(int);
     virtual void calcDelta();
+    virtual void calcNeuronDelta(int);
     virtual void correctAllWeights();
     virtual void correctNeuronWeight(int);
     virtual std::string getName() const;
+    const egn::Matrix<double, egn::Dynamic, 1>& getOutput();
     void disconnect(Layer*);
     void presentAsNode();
     //virtual egn::Matrix<double, egn::Dynamic, 1> getOutput();

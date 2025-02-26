@@ -90,6 +90,7 @@ void NNetwork::setCalcOrder(Layer* layer)
 		}
 	}
 	calc_order.push_back(layer);
+	std::cout << "calc order set" << std::endl;
 }
 
 void NNetwork::showCalcOrder()
@@ -109,6 +110,7 @@ void NNetwork::setLearningOrder()
 	unvisited = layers_all;
 	this->setLearningOrder(input_layer.get());
 	learning_order.push_back(const_layer.get());
+	std::cout << "learning order set" << std::endl;
 }
 
 void NNetwork::setLearningOrder(Layer* layer)
@@ -154,6 +156,15 @@ void NNetwork::showLayers() const
 		std::cout << "--- LAYER: " << ln << std::endl;
 		layers_all[ln]->showLayer();
 	}
+}
+
+void NNetwork::showResult()
+{
+	std::cout << std::fixed << std::showpos << std::setprecision(6)
+		<< " in: " << input_layer->getOutput().transpose()
+		<< "\t out: " << output_layer->getOutput().transpose()
+		<< "\t error: " << (output_layer->getOutput() - output_layer->getTarget()).transpose()
+		<< std::endl;
 }
 
 void NNetwork::calcOutput()
@@ -308,22 +319,29 @@ void NNetwork::correctWeightsWinnigOne()
 	*/
 
 	this->calcOutput();
+
+	
+
 	for (int li = 0; li < learning_order.size(); li++)
 	{
 		Layer* layer = learning_order[li]; 
 
 		int win_neuron;
 		(layer->output.cwiseProduct(layer->output)).maxCoeff(&win_neuron);
+		//std::cout << layer << ": " << win_neuron << std::endl;
 		//std::cout << win_neuron << std::endl;
 		//std::cout << layer << std::endl;
 
 		//for(int j=0; j<=li; j++)
 		//{
-		layer->calcSigma(); // TO CORRECTION - correct win_neuron
+		layer->calcNeuronSigma(win_neuron); // TO CORRECTION - correct win_neuron
+		//layer->calcSigma();
 		//}
-		layer->calcDelta(); // TO CORRECTION - correct win_neuron
+		layer->calcNeuronDelta(win_neuron);
+		//layer->calcDelta();
 
-		layer->correctNeuronWeight(win_neuron);
+		layer->correctNeuronWeight(win_neuron); // TO CORRECTION - correct win_neuron
+
 
 		/*if (li == 2)
 		{
@@ -332,8 +350,17 @@ void NNetwork::correctWeightsWinnigOne()
 
 		//this->calcOutput();
 		//std::cout << this->getOutputLayer()->getOutput()[0] << std::endl;
-
 	}
+
+	//for (int li = 0; li < learning_order.size(); li++)
+	//{
+	//	Layer* layer = learning_order[li];
+	//	int win_neuron;
+	//	(layer->output.cwiseProduct(layer->output)).maxCoeff(&win_neuron);
+	//	layer->correctNeuronWeight(win_neuron);
+	//	// std::cout << layer << ": " << win_neuron << std::endl;
+	//}
+
 }
 
 void NNetwork::showOutput() const
@@ -410,6 +437,20 @@ void NNetwork::showConnections()
 
 }
 
+void NNetwork::showWeights()
+{
+	std::cout << "weights" << std::endl;
+	for (auto layer : calc_order)
+	{
+		for (auto w : layer->weight)
+		{
+			std::cout << w << " | ";
+		}
+		std::cout << std::endl;
+	}
+
+}
+
 Layer* NNetwork::getLayer(int nid)
 {
 	return layers_all[nid];
@@ -436,9 +477,10 @@ void NNetwork::showOutputs()
 
 void NNetwork::showSigmas()
 {
+	std::cout << "sigmas" << std::endl;
 	for (auto layer : calc_order)
 	{
-		std::cout << getLayerIndex(layer) << ":\t" << layer->sigma.transpose() << std::endl;
+		std::cout << layer->sigma.transpose() << " | ";
+		std::cout << std::endl;
 	}
-
 }
